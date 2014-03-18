@@ -159,11 +159,18 @@
             <transparency>0.000000</transparency>
         </Geom>
     </Body>
-    <!--<Body name="tool0" type="dynamic">
+    <Body name="tool0" type="dynamic">
         <offsetfrom>link_6</offsetfrom>
         <translation>0.055000 0.000000 0.000000</translation>
         <quat>1.000000 0.000000 0.000000 0.000000</quat>
-    </Body> -->
+        <Geom render="true" type="sphere">
+            <radius>0.1</radius>
+            <translation>0.055000 0.000000 0.000000</translation>
+            <quat>1.000000 0.000000 0.000000 0.000000</quat>
+            <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
+            <transparency>0.000000</transparency>
+        </Geom>
+    </Body>
     <Joint name="joint_1" type="hinge" enable="true">
         <Body>base_link</Body>
         <Body>link_1</Body>
@@ -218,13 +225,13 @@
         <maxvel>3.3161</maxvel>
         <limitsrad>-6.283000 6.283000</limitsrad>
     </Joint>
-    <!--<Joint name="joint_6-tool0" type="hinge" enable="false">
+    <Joint name="joint_6-tool0" type="hinge" enable="false">
         <Body>link_6</Body>
         <Body>tool0</Body>
         <offsetfrom>link_6</offsetfrom>
         <anchor>0.055000 0.000000 0.000000</anchor>
         <axis>1.000000 0.000000 0.000000</axis>
-    </Joint> -->
+    </Joint> 
     <Joint name="joint_cylinder" type="hinge" enable="false">
         <Body>link_1</Body>
         <Body>link_cylinder</Body>
@@ -243,4 +250,10 @@
         <maxvel>0</maxvel>
         <limitsrad>0.000000 0.600000</limitsrad>
     </Joint>
+
+    <Manipulator name="plaster_tool">
+        <base>base_link</base>
+        <effector>tool0</effector>
+    </Manipulator>
+
 </KinBody>
