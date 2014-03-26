@@ -6,11 +6,16 @@ import copy
 import time
 import numpy as np
 import scipy
+import imp
 
 # OpenRAVE
-import openravepy
+from openravepy import *
 #openravepy.RaveInitialize(True, openravepy.DebugLevel.Debug)
 
+# Import Dfab Python, Watch out for hard coded directory
+imp.load_package('dfab', 
+	         '/home/parallels/catkin_ws/src/robot_autonomy/dfab/python/dfab/')
+from dfab.mocap import extract_trajectory
 
 curr_path = os.getcwd()
 relative_ordata = '/models'
@@ -28,62 +33,44 @@ if ordata_path_thispack not in openrave_data_paths:
 
 class RoboHandler:
   def __init__(self):
-    self.env = openravepy.Environment()
+    self.env = Environment()
     self.env.SetViewer('qtcoin')
     self.env.GetViewer().SetName('Tutorial Viewer')
     self.env.Load('6640_test.env.xml')
     # time.sleep(3) # wait for viewer to initialize. May be helpful to uncomment
     self.robot = self.env.GetRobots()[0]
+
+    # Init IK Solutions
+    self.manip = self.robot.GetActiveManipulator()
+    ikmodel = databases.inversekinematics.InverseKinematicsModel(self.robot)
+    if not ikmodel.load():
+      ikmodel.generate()
     
-
-  #remove all the time.sleep(0) statements! Those are just there so the code can run before you fill in the functions
-
-  # move in a straight line, depending on which direction the robot is facing
-  def move_straight(self, dist):
-    t_move = np.array(([1, 0, 0, dist], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]))
-    with self.env:
-      self.robot.SetTransform(np.dot(self.robot.GetTransform(), t_move))
-
-  # rotate the robot about the z-axis by the specified angle (in radians)
-  def rotate_by(self, ang):
-    t_rot = openravepy.matrixFromAxisAngle([0, 0, ang])
-    with self.env:
-      self.robot.SetTransform(np.dot(self.robot.GetTransform(), t_rot))
-
-  # go to each of the square corners, point towards the center, and snap a photo!
-  def go_around_square(self):
-    with self.env:
-      self.robot.SetTransform(np.array(([1, 0, 0, -1], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1])))
-
-    # No need for with self.env, as it is embedded in all calls
-    for i in xrange(0, 4):
-      self.move_straight(2)
-      self.rotate_by(5*np.pi/4)
-      time.sleep(5)
-      self.rotate_by(np.pi/4)    
-
-    # set the robot back to the initialize position after
-    with self.env:
-      self.robot.SetTransform(np.identity(4)); 
-
-  # a function to help figure out which DOF indices correspond to which part of HERB
-  def figure_out_DOFS(self):
-    with self.env:
-      self.robot.GetJoints()  
-
-  # put herb in self collision
-  def put_in_self_collision(self):
-    with self.env:
-      self.robot.SetDOFValues([3], dofindices=[1], checklimits=0)
-
-  # saves an image from above, pointed straight down
-  def save_viewer_image_topdown(self, imagename):
-    TopDownTrans = np.array([ [0, -1.0, 0, 0], [-1.0, 0, 0, 0], [0, 0, -1.0, 5.0], [0, 0, 0, 1.0] ])
-    #seems to work without this line...but its in the tutorial, so I'll keep it here in case
-    self.env.GetViewer().SendCommand('SetFiguresInCamera 1') # also shows the figures in the image
-    I = self.env.GetViewer().GetCameraImage(640,480,  TopDownTrans,[640,640,320,240])
-    scipy.misc.imsave(imagename + '.jpg',I)
-      
+  def getMocapData(self, filename):
+    '''
+    Looks up a csv filename for mocap data and if successful, returns times, x, 
+    q, ypr.
+    @ Params -> filename : CSV File with Mocap Data
+    @ Returns -> times   : vector of times corresponding to readings
+                 x       : (x, y, z) of centroid of body relative to world frame
+                 q       : quaternion of body relative to world frame
+	         ypr     : Yaw, Pitch, and Roll of body relative to world frame 
+    '''
+    data = extract_trajectory.load_csv_data(filename)
+    return extract_trajectory.extract_trajectory(data)
+  
+  def moveIK(self, Tgoal): 
+    '''
+    Attempts to move the robots end effector to a given transform denoted by
+    Tgoal.  Returns False if no IK solution was found, and True if the robot
+    Moved.
+    '''
+    sol = self.manip.FindIKSolution(Tgoal, IkFilterOptions.CheckEnvCollisions)
+    if sol == None:
+	print "No Solution Found!"
+        return False
+    self.robot.SetDOFValues(sol, self.manip.GetArmIndices())
+    return True
 
 if __name__ == '__main__':
   robo = RoboHandler()
