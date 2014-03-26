@@ -13,8 +13,7 @@ from openravepy import *
 #openravepy.RaveInitialize(True, openravepy.DebugLevel.Debug)
 
 # Import Dfab Python, Watch out for hard coded directory
-imp.load_package('dfab', 
-	         '/home/parallels/catkin_ws/src/robot_autonomy/dfab/python/dfab/')
+dfab_pack = imp.load_package('dfab', '../dfab/python/dfab/')
 from dfab.mocap import extract_trajectory
 
 curr_path = os.getcwd()
@@ -46,7 +45,7 @@ class RoboHandler:
     if not ikmodel.load():
       ikmodel.generate()
     
-  def getMocapData(self, filename):
+  def getMocapData(self, filename, body):
     '''
     Looks up a csv filename for mocap data and if successful, returns times, x, 
     q, ypr.
@@ -57,7 +56,7 @@ class RoboHandler:
 	         ypr     : Yaw, Pitch, and Roll of body relative to world frame 
     '''
     data = extract_trajectory.load_csv_data(filename)
-    return extract_trajectory.extract_trajectory(data)
+    return extract_trajectory.extract_trajectory(data, body=body)
   
   def moveIK(self, Tgoal): 
     '''
