@@ -2,20 +2,19 @@
 
 # Standard Python Imports
 import os
-import copy
-import time
 import numpy as np
-import scipy
+import time
 import imp
 from argparse import ArgumentParser
 
 # OpenRAVE
 from openravepy import *
-#openravepy.RaveInitialize(True, openravepy.DebugLevel.Debug)
+#RaveInitialize(True, DebugLevel.Debug)
 
 # Import Dfab Python, Watch out for hard coded directory
 dfab_pack = imp.load_package('dfab', '../dfab/python/dfab/')
 from dfab.mocap import extract_trajectory
+from dfab.geometry.quaternion import to_threexform
 
 curr_path = os.getcwd()
 relative_ordata = '/models'
@@ -37,7 +36,6 @@ class RoboHandler:
     self.env.SetViewer('qtcoin')
     self.env.GetViewer().SetName('Tutorial Viewer')
     self.env.Load('6640_test.env.xml')
-    # time.sleep(3) # wait for viewer to initialize. May be helpful to uncomment
     self.robot = self.env.GetRobots()[0]
 
     # Init IK Solutions
@@ -52,12 +50,12 @@ class RoboHandler:
   def getMocapData(self, filename, body='6 Point Trowel'):
     '''
     Looks up a csv filename for mocap data and if successful, returns times, x, 
-    q, ypr.
+    q, ypr in world frame.
     @ Params -> filename : CSV File with Mocap Data
     @ Returns -> times   : vector of times corresponding to readings
                  x       : (x, y, z) of centroid of body relative to world frame
                  q       : quaternion of body relative to world frame
-	         ypr     : Yaw, Pitch, and Roll of body relative to world frame 
+	               ypr     : Yaw, Pitch, and Roll of body relative to world frame 
     '''
     data = extract_trajectory.load_csv_data(filename)
     return extract_trajectory.extract_trajectory(data, body=body)
@@ -74,6 +72,24 @@ class RoboHandler:
       return False
     self.robot.SetDOFValues(sol, self.manip.GetArmIndices())
     return True
+
+  def moveTrajectory(self, traj):
+    '''
+    Takes a trajectory, which is [for now] just a 2xn list of points to put the end effector.
+    where this list is (xi, yi, zi), and (qiw, qix, qiy, qiz) in the world frame and i=1:n 
+    where n is the number of points.
+    '''
+
+    for pos, q in traj:
+      # If Sim, then OR works in m, not mm
+      if self.mode == 'sim':
+        pos = pos /1000
+      rot_t = to_threexform(q)
+      Tgoal = np.dot(np.eye(4), np.eye(4)) # Start with Orientation
+      Tgoal[0:3, 3] = pos                  # Add Position
+      self.moveIK(Tgoal)
+      time.sleep(.1)
+
 
 if __name__ == '__main__':
 
@@ -95,9 +111,5 @@ if __name__ == '__main__':
 
   import IPython
   IPython.embed()
-
-  # spin forever
-  while True:
-    time.sleep(0)
   
   
