@@ -7,6 +7,7 @@ import time
 import numpy as np
 import scipy
 import imp
+from argparse import ArgumentParser
 
 # OpenRAVE
 from openravepy import *
@@ -31,7 +32,7 @@ if ordata_path_thispack not in openrave_data_paths:
 
 
 class RoboHandler:
-  def __init__(self):
+  def __init__(self, mode):
     self.env = Environment()
     self.env.SetViewer('qtcoin')
     self.env.GetViewer().SetName('Tutorial Viewer')
@@ -44,8 +45,11 @@ class RoboHandler:
     ikmodel = databases.inversekinematics.InverseKinematicsModel(self.robot)
     if not ikmodel.load():
       ikmodel.generate()
+
+    # Storage of real/sim mode
+    self.mode = mode
     
-  def getMocapData(self, filename, body):
+  def getMocapData(self, filename, body='6 Point Trowel'):
     '''
     Looks up a csv filename for mocap data and if successful, returns times, x, 
     q, ypr.
@@ -66,13 +70,21 @@ class RoboHandler:
     '''
     sol = self.manip.FindIKSolution(Tgoal, IkFilterOptions.CheckEnvCollisions)
     if sol == None:
-	print "No Solution Found!"
-        return False
+      print "No Solution Found!"
+      return False
     self.robot.SetDOFValues(sol, self.manip.GetArmIndices())
     return True
 
 if __name__ == '__main__':
-  robo = RoboHandler()
+
+  parser = ArgumentParser( description = """Python Script for Planning or Simulating IRB 6640 with an OpenRAVE Environment.""")
+  parser.add_argument('-m', '--mode', default='sim', help='Mode For Script to Run in.  Options are sim and real (default is sim)')
+  parser.add_argument('-t', '--trajectory', help='Name of Trajectory File to Follow.')
+  parser.add_argument('-c', '--csv', help='Name of Mocap CSV File captured with 6 point trowel to follow')
+
+  args = parser.parse_args()
+
+  robo = RoboHandler(args.mode)
 
   # Uncomment the following to make the script initialize the RoboHandler
   #  and drop you into an IPython shell.

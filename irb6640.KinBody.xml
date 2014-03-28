@@ -3,13 +3,13 @@
     <KinBody>
         <Body name="base_link" type="dynamic">
             <Geom render="false" type="trimesh">
-                <Data>collision/BASE_LINK.stl</Data>
+                <Data>visual/BASE_LINK.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/BASE_LINK.stl</Render>
+                <Render>collision/BASE_LINK.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
@@ -21,13 +21,13 @@
             <translation>0.000000 0.000000 0.227000</translation>
             <quat>1.000000 0.000000 0.000000 0.000000</quat>
             <Geom render="false" type="trimesh">
-                <Data>collision/LINK_1.stl</Data>
+                <Data>visual/LINK_1.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/LINK_1.stl</Render>
+                <Render>collision/LINK_1.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
@@ -39,13 +39,13 @@
             <translation>0.322000 0.030000 0.551000</translation>
             <quat>1.000000 0.000000 0.000000 0.000000</quat>
             <Geom render="false" type="trimesh">
-                <Data>collision/LINK_2.stl</Data>
+                <Data>visual/LINK_2.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/LINK_2.stl</Render>
+                <Render>collision/LINK_2.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
@@ -57,13 +57,13 @@
             <translation>0.000000 -0.200000 1.070000</translation>
             <quat>1.000000 0.000000 0.000000 0.000000</quat>
             <Geom render="false" type="trimesh">
-                <Data>collision/LINK_3.stl</Data>
+                <Data>visual/LINK_3.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/LINK_3.stl</Render>
+                <Render>collision/LINK_3.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
@@ -75,13 +75,13 @@
             <translation>-0.275000 0.181000 0.200000</translation>
             <quat>1.000000 0.000000 0.000000 0.000000</quat>
             <Geom render="false" type="trimesh">
-                <Data>collision/LINK_4.stl</Data>
+                <Data>visual/LINK_4.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/LINK_4.stl</Render>
+                <Render>collision/LINK_4.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
@@ -93,13 +93,13 @@
             <translation>1.670000 0.000000 0.000000</translation>
             <quat>1.000000 0.000000 0.000000 0.000000</quat>
             <Geom render="false" type="trimesh">
-                <Data>collision/LINK_5.stl</Data>
+                <Data>visual/LINK_5.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/LINK_5.stl</Render>
+                <Render>collision/LINK_5.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
@@ -111,13 +111,13 @@
             <translation>0.153000 0.000000 0.000000</translation>
             <quat>1.000000 0.000000 0.000000 0.000000</quat>
             <Geom render="false" type="trimesh">
-                <Data>collision/LINK_6.stl</Data>
+                <Data>visual/LINK_6.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/LINK_6.stl</Render>
+                <Render>collision/LINK_6.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
@@ -129,13 +129,13 @@
             <translation>-0.365000 -0.189500 0.405000</translation>
             <quat>0.996390 0.000000 -0.084898 0.000000</quat>
             <Geom render="false" type="trimesh">
-                <Data>collision/CYLINDER.stl</Data>
+                <Data>visual/CYLINDER.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/CYLINDER.stl</Render>
+                <Render>collision/CYLINDER.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
@@ -147,13 +147,13 @@
             <translation>0.475000 0.000000 0.000000</translation>
             <quat>1.000000 0.000000 0.000000 0.000000</quat>
             <Geom render="false" type="trimesh">
-                <Data>collision/PISTON.stl</Data>
+                <Data>visual/PISTON.stl</Data>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
             </Geom>
             <Geom render="true" type="sphere">
                 <radius>0.0</radius>
-                <Render>visual/PISTON.stl</Render>
+                <Render>collision/PISTON.stl</Render>
                 <translation>0.000000 0.000000 0.000000</translation>
                 <quat>1.000000 0.000000 0.000000 0.000000</quat>
                 <diffusecolor>1.000000 0.430000 0.000000</diffusecolor>
