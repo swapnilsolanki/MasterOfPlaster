@@ -97,13 +97,14 @@ if __name__ == '__main__':
   parser.add_argument('-m', '--mode', default='sim', help='Mode For Script to Run in.  Options are sim and real (default is sim)')
   parser.add_argument('-t', '--trajectory', help='Name of Trajectory File to Follow.')
   parser.add_argument('-c', '--csv', help='Name of Mocap CSV File captured with 6 point trowel to load as data')
+  parser.add_argument('-b', '--body', default='6 Point Trowel', help='Name of Body in Mocap CSV File captured to look for (default is 6 Point Trowel')
 
   args = parser.parse_args()
 
   robo = RoboHandler(args.mode)
 
   if args.csv != None:
-    data = robo.getMocapData(args.csv)
+    data = robo.getMocapData(args.csv, body=args.body)
 
   # Set Camera
   t = np.array([ [0, -1.0, 0, 0], [-1.0, 0, 0, 0], [0, 0, -1.0, 5.0], [0, 0, 0, 1.0] ])  
