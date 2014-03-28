@@ -96,19 +96,22 @@ if __name__ == '__main__':
   parser = ArgumentParser( description = """Python Script for Planning or Simulating IRB 6640 with an OpenRAVE Environment.""")
   parser.add_argument('-m', '--mode', default='sim', help='Mode For Script to Run in.  Options are sim and real (default is sim)')
   parser.add_argument('-t', '--trajectory', help='Name of Trajectory File to Follow.')
-  parser.add_argument('-c', '--csv', help='Name of Mocap CSV File captured with 6 point trowel to follow')
+  parser.add_argument('-c', '--csv', help='Name of Mocap CSV File captured with 6 point trowel to load as data')
 
   args = parser.parse_args()
 
   robo = RoboHandler(args.mode)
 
-  # Uncomment the following to make the script initialize the RoboHandler
-  #  and drop you into an IPython shell.
+  if args.csv != None:
+    data = robo.getMocapData(args.csv)
+
+  # Set Camera
   t = np.array([ [0, -1.0, 0, 0], [-1.0, 0, 0, 0], [0, 0, -1.0, 5.0], [0, 0, 0, 1.0] ])  
   robo.env.GetViewer().SetCamera(t)
 
   robo.robot.SetVisible(True)
 
+  # Drop Into Shell
   import IPython
   IPython.embed()
   
