@@ -13,7 +13,7 @@ from openravepy import *
 
 # Import Dfab Python, Watch out for hard coded directory
 dfab_pack = imp.load_package('dfab', '../dfab/python/dfab/')
-from dfab.mocap import extract_trajectory
+from dfab.mocap import extract_trajectory, datafiles
 from dfab.geometry.quaternion import to_threexform
 
 curr_path = os.getcwd()
@@ -55,10 +55,43 @@ class RoboHandler:
     @ Returns -> times   : vector of times corresponding to readings
                  x       : (x, y, z) of centroid of body relative to world frame
                  q       : quaternion of body relative to world frame
-	               ypr     : Yaw, Pitch, and Roll of body relative to world frame 
+                 ypr     : Yaw, Pitch, and Roll of body relative to world frame 
     '''
     data = extract_trajectory.load_csv_data(filename)
     return extract_trajectory.extract_trajectory(data, body=body)
+
+  def getMocapTraj(self, filename):
+    '''
+    Looks up a csv filename for mocap trajectory and if successful, returns times, 
+    and 4x4 transforms in world frame.
+    @ Params -> filename : CSV File with Mocap Data
+    @ Returns -> paths : list of 4x4 transforms found in traj file
+                 times : vector of times corresponding to readings
+                 
+    '''
+    paths, times = datafiles.read_frame_trajectory_file(filename)
+    transforms = [np.identity(4) for i in paths]
+    for i in xrange(0, len(transforms)):
+      self.write_frame_record_to_transform(paths[i], transforms[i])
+
+    return (transforms, times)
+
+  def write_frame_record_to_transform( self, frame, transform ):
+    """Write a 2-D frame list in file format into a numpy matrix."""
+    # write the frame components into the homogeneous transform
+    transform[0:3, 3] = frame[0] # origin
+    transform[0:3, 0] = frame[1] # X axis
+    transform[0:3, 1] = frame[2] # Y axis
+    transform[0:3, 2] = frame[3] # Z axis
+
+    # scale the millimeters from the file to meters for the graphics
+    transform[0:3, 3] *= 0.001
+    # Swap X and Y, as they're flipped between data and sim bot
+    temp = transform[1, 3] 
+    transform[1, 3] = transform[0, 3] 
+    transform[0, 3] = temp - .400
+    return
+
   
   def moveIK(self, Tgoal): 
     '''
@@ -75,9 +108,9 @@ class RoboHandler:
 
   def moveTrajectory(self, traj):
     '''
-    Takes a trajectory, which is [for now] just a 2xn list of points to put the end effector.
-    where this list is (xi, yi, zi), and (qiw, qix, qiy, qiz) in the world frame and i=1:n 
-    where n is the number of points.
+    Takes a trajectory, which is [for now] just a 2xn list of points to put the 
+    end effector, where this list is a list of 4x4 transforms in the world frame 
+    and i=1:n where n is the number of points.
     '''
 
     for pos, q in traj:
@@ -95,7 +128,7 @@ if __name__ == '__main__':
 
   parser = ArgumentParser( description = """Python Script for Planning or Simulating IRB 6640 with an OpenRAVE Environment.""")
   parser.add_argument('-m', '--mode', default='sim', help='Mode For Script to Run in.  Options are sim and real (default is sim)')
-  parser.add_argument('-t', '--trajectory', help='Name of Trajectory File to Follow.')
+  parser.add_argument('-t', '--trajectory', help='Name of Trajectory File to read as input.')
   parser.add_argument('-c', '--csv', help='Name of Mocap CSV File captured with 6 point trowel to load as data')
   parser.add_argument('-b', '--body', default='6 Point Trowel', help='Name of Body in Mocap CSV File captured to look for (default is 6 Point Trowel')
 
@@ -105,6 +138,9 @@ if __name__ == '__main__':
 
   if args.csv != None:
     data = robo.getMocapData(args.csv, body=args.body)
+
+  if args.trajectory != None:
+    (traj, t) = robo.getMocapTraj(args.trajectory)
 
   # Set Camera
   t = np.array([ [0, -1.0, 0, 0], [-1.0, 0, 0, 0], [0, 0, -1.0, 5.0], [0, 0, 0, 1.0] ])  
