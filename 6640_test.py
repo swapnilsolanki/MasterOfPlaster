@@ -89,7 +89,7 @@ class RoboHandler:
     # Swap X and Y, as they're flipped between data and sim bot
     temp = transform[1, 3] 
     transform[1, 3] = transform[0, 3] 
-    transform[0, 3] = temp - .400
+    transform[0, 3] = temp# - .400
     return
 
   
@@ -123,6 +123,14 @@ class RoboHandler:
       self.moveIK(Tgoal)
       time.sleep(.1)
 
+  def moveTransforms(self, transforms):
+    '''
+    Takes a list of transforms and moves the robot through the trajectory.
+    '''
+    for t in transforms:
+      self.moveIK(t)
+      time.sleep(.1)
+
 
 if __name__ == '__main__':
 
@@ -140,7 +148,7 @@ if __name__ == '__main__':
     data = robo.getMocapData(args.csv, body=args.body)
 
   if args.trajectory != None:
-    (traj, t) = robo.getMocapTraj(args.trajectory)
+    (trans, t) = robo.getMocapTraj(args.trajectory)
 
   # Set Camera
   t = np.array([ [0, -1.0, 0, 0], [-1.0, 0, 0, 0], [0, 0, -1.0, 5.0], [0, 0, 0, 1.0] ])  
