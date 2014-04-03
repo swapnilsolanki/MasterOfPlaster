@@ -5,6 +5,7 @@ import os
 import numpy as np
 import time
 import imp
+import sys
 from argparse import ArgumentParser
 
 # OpenRAVE
@@ -15,6 +16,7 @@ from openravepy import *
 dfab_pack = imp.load_package('dfab', '../dfab/python/dfab/')
 from dfab.mocap import extract_trajectory, datafiles
 from dfab.geometry.quaternion import to_threexform
+from dfab.rapid.joint_sequence import single_trajectory_program
 
 curr_path = os.getcwd()
 relative_ordata = '/models'
@@ -94,19 +96,22 @@ class RoboHandler:
     return
 
   
-  def moveIK(self, Tgoal): 
+  def moveIK(self, Tgoal, move=True): 
     '''
     Attempts to move the robots end effector to a given transform denoted by
-    Tgoal.  Returns False if no IK solution was found, and True if the robot
-    Moved.
+    Tgoal.  Returns None if no solution is found or Returns the solution if
+    there is one.
     '''
+    # Get a solution from IK Solver
     sol = self.manip.FindIKSolution(Tgoal, IkFilterOptions.CheckEnvCollisions)
+    # If solution is none, print info
     if sol == None:
       print "No Solution Found!"
       print Tgoal
-      return False
-    self.robot.SetDOFValues(sol, self.manip.GetArmIndices())
-    return True
+    # If we're actually supposed to move, do it
+    if move:
+      self.robot.SetDOFValues(sol, self.manip.GetArmIndices())
+    return sol
 
   def moveTrajectory(self, traj):
     '''
@@ -129,9 +134,12 @@ class RoboHandler:
     '''
     Takes a list of transforms and moves the robot through the trajectory.
     '''
+    # Iterate over all transforms
     for t in transforms:
+      # If coordinates passed in tool frame, change to robot frame
       if toolframe:
         t = self.toolToRobotTransform(t)
+      # Move the robot
       self.moveIK(t)
       time.sleep(.1)
 
@@ -139,18 +147,63 @@ class RoboHandler:
     '''
     Transforms from the tool frame to the robot frame
     '''
+    # Rotate about z by 90 degrees
     t_z_90 = numpy.array([[0, -1, 0, 0], 
                           [1,  0, 0, 0], 
                           [0,  0, 1, 0], 
                           [0, 0, 0, 1]])
 
+    # Rotate about x by -90 degrees
     t_x_m90 = numpy.array([[1,  0, 0, 0], 
                            [0,  0, 1, 0], 
                            [0, -1, 0, 0], 
                            [0, 0, 0, 1]])
 
+    # Frame change is rotate about z by 90, then x by -90
     frame_change = np.dot(t_z_90, t_x_m90)
+    # Return H_wt dot H_tr
     return np.dot(transform, frame_change)
+
+  def writeModFile(self, times, transforms, toolframe=False):
+    '''
+    Writes a mod file for the trajectory described by t (the list of times) and
+    transforms (the list of 4x4 homogeneous transforms the robots end effector)
+    goes through.  The toolframe parameter indicates whether the Transformations
+    are in the tools frame (toolframe=True) or Robots frame (toolframe=False).
+    '''
+    # Get pruned times and joints from function
+    times, joints = self.generateJointTrajectoryFromIK(times, transforms, toolframe=toolframe)
+
+    # Format data
+    data = [[time, [0] + j_vals.tolist()] for (time, j_vals) in zip(times, joints)]
+
+    # Write File
+    single_trajectory_program(data)
+
+  def generateJointTrajectoryFromIK(self, times, transforms, toolframe=False):
+    '''
+    Generates a Joint Trajectory from a list of 4x4 homogeneous transforms the robots'
+    end effector is supposed to go through and the list of times it is supposed
+    to be there.  The toolframe parameter indicates whether the Transformations
+    are in the tools frame (toolframe=True) or Robots frame (toolframe=False).
+    '''
+
+    # Initialize returned lists
+    joint_traj = []
+    traj_times = []
+    # Iterate over trajectory
+    for time, t in zip(times, transforms):
+      if toolframe:
+        # Transform tool frame to robot frame
+        t = self.toolToRobotTransform(t)
+      # Get Solution
+      sol = self.moveIK(t, move=False)
+      # If solution exists, append it to the list
+      if sol != None:
+        joint_traj.append(sol)
+        traj_times.append(time)
+
+    return traj_times, joint_traj
 
 
 
@@ -170,7 +223,7 @@ if __name__ == '__main__':
     data = robo.getMocapData(args.csv, body=args.body)
 
   if args.trajectory != None:
-    (trans, t) = robo.getMocapTraj(args.trajectory)
+    (trans, times) = robo.getMocapTraj(args.trajectory)
 
   # Set Camera
   t = np.array([ [0, -1.0, 0, 2.25], [-1.0, 0, 0, 0], [0, 0, -1.0, 4.0], [0, 0, 0, 1.0] ])  
