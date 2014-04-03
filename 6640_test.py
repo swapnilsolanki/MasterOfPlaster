@@ -47,7 +47,7 @@ class RoboHandler:
     # Storage of real/sim mode
     self.mode = mode
     
-  def getMocapData(self, filename, body='6 Point Trowel'):
+  def getMocapData(self, filename, body='6 Point Trowel', subsample=12):
     '''
     Looks up a csv filename for mocap data and if successful, returns times, x, 
     q, ypr in world frame.
@@ -60,7 +60,7 @@ class RoboHandler:
     data = extract_trajectory.load_csv_data(filename)
     return extract_trajectory.extract_trajectory(data, body=body)
 
-  def getMocapTraj(self, filename):
+  def getMocapTraj(self, filename ):
     '''
     Looks up a csv filename for mocap trajectory and if successful, returns times, 
     and 4x4 transforms in world frame.
@@ -89,7 +89,8 @@ class RoboHandler:
     # Swap X and Y, as they're flipped between data and sim bot
     temp = transform[1, 3] 
     transform[1, 3] = transform[0, 3] 
-    transform[0, 3] = temp# - .400
+    transform[0, 3] = temp
+
     return
 
   
@@ -102,6 +103,7 @@ class RoboHandler:
     sol = self.manip.FindIKSolution(Tgoal, IkFilterOptions.CheckEnvCollisions)
     if sol == None:
       print "No Solution Found!"
+      print Tgoal
       return False
     self.robot.SetDOFValues(sol, self.manip.GetArmIndices())
     return True
@@ -123,13 +125,33 @@ class RoboHandler:
       self.moveIK(Tgoal)
       time.sleep(.1)
 
-  def moveTransforms(self, transforms):
+  def moveTransforms(self, transforms, toolframe=False):
     '''
     Takes a list of transforms and moves the robot through the trajectory.
     '''
     for t in transforms:
+      if toolframe:
+        t = self.toolToRobotTransform(t)
       self.moveIK(t)
       time.sleep(.1)
+
+  def toolToRobotTransform(self, transform):
+    '''
+    Transforms from the tool frame to the robot frame
+    '''
+    t_z_90 = numpy.array([[0, -1, 0, 0], 
+                          [1,  0, 0, 0], 
+                          [0,  0, 1, 0], 
+                          [0, 0, 0, 1]])
+
+    t_x_m90 = numpy.array([[1,  0, 0, 0], 
+                           [0,  0, 1, 0], 
+                           [0, -1, 0, 0], 
+                           [0, 0, 0, 1]])
+
+    frame_change = np.dot(t_z_90, t_x_m90)
+    return np.dot(transform, frame_change)
+
 
 
 if __name__ == '__main__':
@@ -151,7 +173,7 @@ if __name__ == '__main__':
     (trans, t) = robo.getMocapTraj(args.trajectory)
 
   # Set Camera
-  t = np.array([ [0, -1.0, 0, 0], [-1.0, 0, 0, 0], [0, 0, -1.0, 5.0], [0, 0, 0, 1.0] ])  
+  t = np.array([ [0, -1.0, 0, 2.25], [-1.0, 0, 0, 0], [0, 0, -1.0, 4.0], [0, 0, 0, 1.0] ])  
   robo.env.GetViewer().SetCamera(t)
 
   robo.robot.SetVisible(True)
