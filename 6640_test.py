@@ -42,9 +42,9 @@ class RoboHandler:
 
     # Init IK Solutions
     self.manip = self.robot.GetActiveManipulator()
-    ikmodel = databases.inversekinematics.InverseKinematicsModel(self.robot)
+    ikmodel = databases.inversekinematics.InverseKinematicsModel(self.robot, iktype=IkParameterizationType.Transform6D)
     if not ikmodel.load():
-      ikmodel.generate()
+      ikmodel.autogenerate()
 
     # Storage of real/sim mode
     self.mode = mode
