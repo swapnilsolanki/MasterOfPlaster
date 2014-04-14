@@ -225,36 +225,7 @@ if __name__ == '__main__':
   if args.trajectory != None:
     (trans, times) = robo.getMocapTraj(args.trajectory)
 
-  count  = 0
-  
-  trans1 = []
-  trans2 = []
-  for i in range(0,len(trans)):
-    if trans[i][1][3] > 2.3:
-        count = count + 1
-        trans1.append(trans[i])
-  for i in range(0,len(trans1)-1):
-    k = i
-    count2 = 0
-    x = []
-    while trans1[k+1][2][3] > trans1[k][2][3] and k < len(trans1)- 2:
-      count2 = count2 + 1
-      x.append(trans1[k])
-      k = k + 1 
-    if count2 > 80:
-      trans2.append(x)
-
-  lengths = []
-
-  for i in range(0,len(trans2)-1):
-    lengths.append([len(trans2[i]),i])
-
-  l = np.array(lengths)
-  l_sorted = sorted(l, key=lambda j: j[0],reverse=True) 
-  max_id = l_sorted[0][1]
-
-
-  vertical_move = trans2[max_id]
+ 
 
   # Set Camera
   t = np.array([ [0, -1.0, 0, 2.25], [-1.0, 0, 0, 0], [0, 0, -1.0, 4.0], [0, 0, 0, 1.0] ])  
